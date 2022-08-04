@@ -18,48 +18,75 @@ blogPostsRouter.post("/", async (req, res, next) => {
   }
 })
 
+// blogPostsRouter.get("/", async (req, res, next) => {
+//   try {
+//     const blogPosts = await BlogPostsModel.find()
+//     res.send(blogPosts)
+//   } catch (error) {
+//     next(error)
+//   }
+// })
 blogPostsRouter.get("/", async (req, res, next) => {
-  // try {
-  //   const blogPosts = await BlogPostsModel.find()
-  //   res.send(blogPosts)
-  // } catch (error) {
-  //   next(error)
-  // }
   try {
     const mongoQuery = q2m(req.query)
-    const { totalBlogPosts, findBlogPosts } =
-      await BlogPostsModel.findBlogWithAuthors(mongoQuery)
-    // const totalBlogPosts = await BlogPostsModel.countDocuments(
-    //   mongoQuery.criteria
-    // )
-    // const findBlogPosts = await BlogPostsModel.find(
-    //   mongoQuery.criteria
-    //   //mongoQuery.options.fields
-    // )
-    // http://localhost:3001/blogPosts?category=Music  RESULt== 2
-    console.log("TOTAL BLOG POSTS: ", totalBlogPosts)
-    console.log("FIND BLOG POSTS: ", findBlogPosts)
-    // .limit(mongoQuery.options.limit)
-    // .skip(mongoQuery.options.skip)
-    // .sort(mongoQuery.options.sort)
+    const totalBlogPosts = await BlogPostsModel.countDocuments(
+      mongoQuery.criteria
+    )
+    const blogPosts = await BlogPostsModel.find(
+      mongoQuery.criteria,
+      mongoQuery.options.fields
+    )
+      .limit(mongoQuery.options.limit)
+      .skip(mongoQuery.options.skip)
+      .sort(mongoQuery.options.sort)
+      .populate({ path: "authors", select: "firstName lastName" }) //http://localhost:3001/blogPosts?title=Windows Internals1
+    // return { totalBlogPosts, blogPosts }
     res.send({
       links: mongoQuery.links(
         "http://localhost:3001/blogPosts",
         totalBlogPosts
       ),
       totalBlogPosts,
-      //totalPages: Math.ceil(totalBlogPosts / mongoQuery.options.limit),
-      findBlogPosts,
+      totalPages: Math.ceil(totalBlogPosts / mongoQuery.options.limit),
+      blogPosts,
     })
-    //res.send(findBlogPosts)
   } catch (error) {
     next(error)
   }
 })
 
+// blogPostsRouter.get("/", async (req, res, next) => {
+//   try {
+//     const mongoQuery = q2m(req.query)
+//     const { totalBlogPosts, blogPosts } =
+//       await BlogPostsModel.findBlogWithAuthors(mongoQuery).populate({
+//         path: "authors",
+//         select: "firstName lastName",
+//       })
+
+//     res.send({
+//       links: mongoQuery.links(
+//         "http://localhost:3001/blogPosts",
+//         totalBlogPosts
+//       ),
+//       totalBlogPosts,
+//       totalPages: Math.ceil(totalBlogPosts / mongoQuery.options.limit),
+//       blogPosts,
+//     })
+//     //res.send(blogPosts)
+//     console.log("TOTAL BLOG POSTS: ", totalBlogPosts)
+//     console.log("FIND BLOG POSTS: ", blogPosts)
+//   } catch (error) {
+//     next(error)
+//   }
+// })
+
 blogPostsRouter.get("/:postId", async (req, res, next) => {
   try {
-    const blogPost = await BlogPostsModel.findById(req.params.postId)
+    const blogPost = await BlogPostsModel.findById(req.params.postId).populate({
+      path: "authors",
+      //select: "firstName lastName",
+    })
     if (blogPost) {
       res.send(blogPost)
     } else {
@@ -80,18 +107,8 @@ blogPostsRouter.put("/:postId", async (req, res, next) => {
     const blogPosts = await BlogPostsModel.findByIdAndUpdate(
       req.params.postId, // WHO you want to modify
       req.body, // HOW you want to modify
-      { new: true, runValidators: true } // OPTIONS. By default findByIdAndUpdate returns the record pre-modification. If you want to get back the newly update record you should use the option new: true
-      // By default validation is off here --> runValidators: true
+      { new: true, runValidators: true }
     )
-    // ************************************************* ALTERNATIVE METHOD *******************************************************
-
-    // const user = await BlogPostsModel.findById(req.params.userId) // when you do a findById, findOne, etc,... you get back a MONGOOSE DOCUMENT which is NOT a normal object but an object with some superpowers (like the .save() method) that will be useful in the future
-
-    // user.firstName = "Diego"
-
-    // await user.save()
-
-    // res.send(user)
 
     if (blogPosts) {
       res.send(blogPosts)

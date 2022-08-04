@@ -28,12 +28,12 @@ blogPostsSchema.static("findBlogWithAuthors", async function (query) {
   // If I use an arrow function here, "this" will be undefined. If I use a traditional function, "this" will refer to BooksModel itself
   console.log("THIS: ", this)
   const totalBlogPosts = await this.countDocuments(query.criteria)
-  const findBlogPosts = await this.find(query.criteria, query.options.fields)
-    // .limit(query.options.limit) // no matter the order of usage of these three methods, Mongo will ALWAYS apply SORT then SKIP then LIMIT in this order
-    // .skip(query.options.skip)
-    // .sort(query.options.sort)
+  const blogPosts = await this.find(query.criteria, query.options.fields)
+    .limit(query.options.limit) // no matter the order of usage of these three methods, Mongo will ALWAYS apply SORT then SKIP then LIMIT in this order
+    .skip(query.options.skip)
+    .sort(query.options.sort)
     .populate({ path: "authors", select: "firstName lastName" })
-  return { findBlogPosts, totalBlogPosts }
+  return { totalBlogPosts, blogPosts }
 })
 
 export default model("blogPosts", blogPostsSchema)
