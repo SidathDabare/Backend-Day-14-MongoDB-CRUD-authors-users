@@ -4,26 +4,22 @@ import mongoose from "mongoose"
 
 const { Schema, model } = mongoose
 
-const blogPostsSchema = new Schema(
+const usersSchema = new Schema(
   {
-    category: { type: String, required: true },
-    title: { type: String, required: true },
-    cover: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true },
+    dateOfBirth: { type: Date, required: true },
+    age: { type: Number, required: true, min: 18, max: 65 },
     professions: [String],
-    readTime: {
-      value: { type: Number },
-      unit: { type: String },
+    address: {
+      street: { type: String },
+      number: { type: Number },
     },
-    author: {
-      name: { type: String },
-      avatar: { type: String },
-    },
-    content: { type: String, required: false },
-    commentHistory: [{ comment: String, rate: Number, created_At: Date }],
   },
   {
     timestamps: true,
   }
 )
 
-export default model("blogPosts", blogPostsSchema)
+export default model("User", usersSchema)
