@@ -39,7 +39,8 @@ blogPostsRouter.get("/", async (req, res, next) => {
       .limit(mongoQuery.options.limit)
       .skip(mongoQuery.options.skip)
       .sort(mongoQuery.options.sort)
-      .populate({ path: "authors", select: "firstName lastName" }) //http://localhost:3001/blogPosts?title=Windows Internals1
+      .populate({ path: "authors" }) //http://localhost:3001/blogPosts?title=Windows Internals1
+    //.populate({ path: "authors", select: "firstName lastName" }) //http://localhost:3001/blogPosts?title=Windows Internals1
     // return { totalBlogPosts, blogPosts }
     res.send({
       links: mongoQuery.links(

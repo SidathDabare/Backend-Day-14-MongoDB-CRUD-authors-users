@@ -32,7 +32,8 @@ blogPostsSchema.static("findBlogWithAuthors", async function (query) {
     .limit(query.options.limit) // no matter the order of usage of these three methods, Mongo will ALWAYS apply SORT then SKIP then LIMIT in this order
     .skip(query.options.skip)
     .sort(query.options.sort)
-    .populate({ path: "authors", select: "firstName lastName" })
+    .populate({ path: "authors" })
+  //.populate({ path: "authors", select: "firstName lastName" })
   return { totalBlogPosts, blogPosts }
 })
 
